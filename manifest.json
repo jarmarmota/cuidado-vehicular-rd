@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Cuidado Vehicular RD</title>
+
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#15171B">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ===== SETUP — primera vez ===== -->
+  <section class="screen" id="screen-setup">
+    <h1 class="page-title">Hola 👋</h1>
+    <div class="page-sub">Empecemos registrando tu vehículo.</div>
+
+    <div class="field">
+      <label>Marca</label>
+      <input id="setup-marca" type="text" placeholder="Ej. Mazda">
+    </div>
+    <div class="field-row">
+      <div class="field"><label>Modelo</label><input id="setup-modelo" type="text" placeholder="Ej. CX-5"></div>
+      <div class="field"><label>Año</label><input id="setup-anio" type="number" placeholder="2021"></div>
+    </div>
+    <div class="field">
+      <label>Motor</label>
+      <input id="setup-motor" type="text" placeholder="Ej. 2.5L Skyactiv-G">
+    </div>
+    <div class="field">
+      <label>Kilometraje actual</label>
+      <input id="setup-km" type="number" placeholder="62400">
+    </div>
+
+    <button class="btn btn-primary" onclick="App.saveSetup()">Guardar y empezar</button>
+  </section>
+
+  <!-- ===== HOME ===== -->
+  <section class="screen" id="screen-home">
+    <div class="topbar">
+      <div>
+        <div class="topbar-tag">Mi Vehículo</div>
+        <div class="topbar-title">Inicio</div>
+      </div>
+    </div>
+
+    <div class="card vehicle-card">
+      <div>
+        <div class="vehicle-name" id="home-vehicle-name">—</div>
+        <div class="vehicle-sub" id="home-vehicle-sub">—</div>
+      </div>
+      <div class="odo-badge" onclick="App.promptUpdateKm()">
+        <span id="home-odo">0</span><span>km · tocar para actualizar</span>
+      </div>
+    </div>
+
+    <div class="alert-card" id="home-alert">
+      <div class="alert-tag">Próximo mantenimiento</div>
+      <div class="alert-text" id="home-alert-text">Calculando...</div>
+    </div>
+
+    <div class="card cost-strip">
+      <div>
+        <div class="cost-label">Costo este mes</div>
+        <div class="cost-val" id="home-cost-km">RD$0<span style="font-size:11px; color:var(--dim);">/km</span></div>
+      </div>
+      <div style="text-align:right;">
+        <div class="cost-label">Total mensual</div>
+        <div class="cost-val" style="color:var(--amber); font-size:16px;" id="home-cost-total">RD$0</div>
+      </div>
+    </div>
+
+    <div class="section-label">Módulos</div>
+    <div class="module-grid">
+      <div class="module-tile" onclick="App.go('mod1')"><div class="module-icon">🔧</div><div class="module-label">Mantenimiento</div></div>
+      <div class="module-tile" onclick="App.go('mod2')"><div class="module-icon">🧭</div><div class="module-label">Viaje Largo</div></div>
+      <div class="module-tile" onclick="App.go('mod3')"><div class="module-icon">📊</div><div class="module-label">Gastos</div></div>
+      <div class="module-tile" onclick="App.go('mod4')"><div class="module-icon">⛽</div><div class="module-label">Combustible</div></div>
+      <div class="module-tile" onclick="App.go('mod5')"><div class="module-icon">🫧</div><div class="module-label">Car Wash</div></div>
+      <div class="module-tile" onclick="App.go('mod6')"><div class="module-icon">🛠️</div><div class="module-label">Talleres</div></div>
+    </div>
+  </section>
+
+  <!-- ===== MÓDULO 1 — Mantenimiento ===== -->
+  <section class="screen" id="screen-mod1">
+    <div class="topbar">
+      <div class="back-btn" onclick="App.go('home')">←</div>
+      <div><div class="topbar-tag">Módulo 1</div><div class="topbar-title">Mantenimiento</div></div>
+    </div>
+    <div class="page-sub" id="mod1-sub">—</div>
+    <div class="card" id="mod1-list" style="padding-top:4px;"></div>
+    <div class="context-note" id="mod1-context"></div>
+  </section>
+
+  <!-- ===== MÓDULO 2 — Viaje Largo ===== -->
+  <section class="screen" id="screen-mod2">
+    <div class="topbar">
+      <div class="back-btn" onclick="App.go('home')">←</div>
+      <div><div class="topbar-tag">Módulo 2</div><div class="topbar-title">Modo Viaje Largo</div></div>
+    </div>
+
+    <div class="field">
+      <label>¿A dónde vas?</label>
+      <input id="trip-destino" type="text" placeholder="Ej. Punta Cana">
+    </div>
+    <div class="field">
+      <label>Km estimados</label>
+      <input id="trip-km" type="number" placeholder="245">
+    </div>
+    <div class="field">
+      <label>Presión de neumáticos</label>
+      <select id="trip-presion">
+        <option value="ok">Revisada y correcta</option>
+        <option value="baja">Una o más bajas</option>
+        <option value="no">No la he revisado</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>¿Tienes gato y llave de gomas?</label>
+      <select id="trip-gato">
+        <option value="si">Sí</option>
+        <option value="no">No</option>
+      </select>
+    </div>
+
+    <button class="btn btn-primary" onclick="App.calcTrip()">Calcular preparación</button>
+
+    <div id="trip-result" style="display:none; margin-top:20px;">
+      <div class="page-sub" id="trip-result-summary" style="text-align:center;"></div>
+      <div class="score-ring" id="trip-ring">
+        <div class="score-inner"><div class="score-num" id="trip-score">—</div><div class="score-den">/ 100</div></div>
+      </div>
+      <div class="card" id="trip-checklist" style="padding-top:4px;"></div>
+      <div class="trip-note" id="trip-note"></div>
+    </div>
+  </section>
+
+  <!-- ===== MÓDULO 3 — Gastos ===== -->
+  <section class="screen" id="screen-mod3">
+    <div class="topbar">
+      <div class="back-btn" onclick="App.go('home')">←</div>
+      <div><div class="topbar-tag">Módulo 3</div><div class="topbar-title">Historial de Gastos</div></div>
+    </div>
+
+    <div class="km-cost">
+      <div class="km-cost-num" id="mod3-kmcost">RD$0</div>
+      <div class="km-cost-label">por kilómetro este mes</div>
+    </div>
+
+    <div class="card" id="mod3-bars" style="margin-top:10px;"></div>
+
+    <div class="section-label">Agregar gasto</div>
+    <div class="field-row">
+      <div class="field">
+        <label>Categoría</label>
+        <select id="exp-cat">
+          <option value="Combustible">Combustible</option>
+          <option value="Mantenimiento">Mantenimiento</option>
+          <option value="Seguro / marbete">Seguro / marbete</option>
+          <option value="Car wash">Car wash</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div class="field"><label>Monto (RD$)</label><input id="exp-monto" type="number" placeholder="1500"></div>
+    </div>
+    <div class="field"><label>Km recorridos en el periodo (opcional)</label><input id="exp-km" type="number" placeholder="800"></div>
+    <button class="btn btn-secondary" onclick="App.addExpense()">+ Agregar gasto</button>
+
+    <div class="section-label">Movimientos recientes</div>
+    <div class="card" id="mod3-list" style="padding-top:4px;"></div>
+  </section>
+
+  <!-- ===== MÓDULO 4 — Combustible ===== -->
+  <section class="screen" id="screen-mod4">
+    <div class="topbar">
+      <div class="back-btn" onclick="App.go('home')">←</div>
+      <div><div class="topbar-tag">Módulo 4</div><div class="topbar-title">Combustible</div></div>
+    </div>
+
+    <div class="card">
+      <div class="section-label" style="margin-top:0;">Precios oficiales MICM — esta semana</div>
+      <div class="price-row"><span>Gasolina Premium</span><span>RD$335.10/gal</span></div>
+      <div class="price-row"><span>Gasolina Regular</span><span>RD$307.50/gal</span></div>
+      <div class="price-row"><span>Gasoil Óptimo</span><span>RD$287.10/gal</span></div>
+    </div>
+
+    <div class="octane-card" id="mod4-octane">—</div>
+
+    <div class="section-label">Estaciones cercanas</div>
+    <div class="card" id="mod4-stations" style="padding-top:4px;"></div>
+
+    <button class="btn btn-secondary" onclick="App.reportPending('combustible')">Reportar estación / precio</button>
+  </section>
+
+  <!-- ===== MÓDULO 5 — Car Wash ===== -->
+  <section class="screen" id="screen-mod5">
+    <div class="topbar">
+      <div class="back-btn" onclick="App.go('home')">←</div>
+      <div><div class="topbar-tag">Módulo 5</div><div class="topbar-title">Car Wash y Detailing</div></div>
+    </div>
+
+    <div class="chip-row" id="mod5-vehicle-chips">
+      <div class="chip" data-val="Carro" onclick="App.setChip(this,'vehicle')">Carro</div>
+      <div class="chip active" data-val="SUV" onclick="App.setChip(this,'vehicle')">SUV</div>
+      <div class="chip" data-val="SUV XL" onclick="App.setChip(this,'vehicle')">SUV XL</div>
+    </div>
+    <div class="chip-row" id="mod5-service-chips">
+      <div class="chip active" data-val="Cera a máquina" onclick="App.setChip(this,'service')">Cera a máquina</div>
+      <div class="chip" data-val="Detailing" onclick="App.setChip(this,'service')">Detailing</div>
+      <div class="chip" data-val="Lavado básico" onclick="App.setChip(this,'service')">Lavado básico</div>
+    </div>
+
+    <div id="mod5-sites"></div>
+
+    <button class="btn btn-secondary" onclick="App.reportPending('carwash')">Reportar precio de un sitio</button>
+  </section>
+
+  <!-- ===== MÓDULO 6 — Talleres ===== -->
+  <section class="screen" id="screen-mod6">
+    <div class="topbar">
+      <div class="back-btn" onclick="App.go('home')">←</div>
+      <div><div class="topbar-tag">Módulo 6</div><div class="topbar-title">Talleres Confiables</div></div>
+    </div>
+
+    <div class="link-banner" id="mod6-link"></div>
+
+    <div id="mod6-shops"></div>
+
+    <button class="btn btn-secondary" onclick="App.reportPending('taller')">Sugerir un taller</button>
+  </section>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="modal-overlay" onclick="if(event.target===this) Modal.close()">
+  <div class="modal-box">
+    <div class="modal-title" id="modal-title"></div>
+    <div class="modal-body" id="modal-body"></div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" id="modal-cancel-btn" onclick="Modal.close()">Cancelar</button>
+      <button class="btn btn-primary" id="modal-confirm-btn" onclick="Modal.confirmClicked()">Confirmar</button>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script>
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", () => {
+      navigator.serviceWorker.register("sw.js").catch(() => {});
+    });
+  }
+</script>
+</body>
+</html>
